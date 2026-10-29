@@ -1,3 +1,5 @@
+
+import matplotlib.pyplot as plt
 import pyodbc
 import pandas as pd
 
@@ -27,7 +29,8 @@ df_pacientes_ciudad = pd.read_sql(
     sql_pacientes_ciudad,
     conexion
 )
-
+print("Consulta Pacientes OK")
+print(f"Registros: {len(df_pacientes_ciudad)}")
 
 ## Consulta 2: Citas por médico
 
@@ -47,6 +50,8 @@ df_citas_medico = pd.read_sql(
     conexion
 )
 
+print("Consulta Pacientes OK")
+print(f"Registros: {len(df_pacientes_ciudad)}")
 ## Consulta 3: Citas por especialidad
 
 sql_especialidad = """
@@ -66,7 +71,8 @@ df_especialidad = pd.read_sql(
     sql_especialidad,
     conexion
 )
-
+print("Consulta especialidad OK")
+print(f"Registros: {len(df_pacientes_ciudad)}")
 ## Consulta 4: Facturación
 
 sql_facturacion = """
@@ -104,10 +110,7 @@ print(df_facturacion)
 
 print("FIN DEL PROGRAMA")
 
-df_resumen.to_excel(
-    "Reportes/prueba.xlsx",
-    index=False
-)
+
 
 
 with pd.ExcelWriter(
@@ -145,4 +148,105 @@ with pd.ExcelWriter(
         index=False
     )
 
+
+
+
+
+## Gráfico de Pacientes por Ciudad
+
+plt.figure(figsize=(8,5))
+
+plt.bar(
+    df_pacientes_ciudad['Ciudad'],
+    df_pacientes_ciudad['TotalPacientes']
+)
+
+plt.title('Pacientes por Ciudad - BD_CLINICA_PRACTICA')
+##plt.title('Pacientes por Ciudad')
+plt.xlabel('Ciudad')
+plt.ylabel('Cantidad')
+
+plt.tight_layout()
+
+plt.savefig(
+    'Reportes/pacientes_por_ciudad.png'
+)
+
+plt.close()
+
+
+## Gráfico de Especialidades
+
+plt.figure(figsize=(8,5))
+
+plt.bar(
+    df_especialidad['Especialidad'],
+    df_especialidad['TotalCitas']
+)
+
+plt.title('Citas por Especialidad')
+plt.xlabel('Especialidad')
+plt.ylabel('Cantidad')
+
+plt.xticks(rotation=30)
+
+plt.tight_layout()
+
+plt.savefig(
+    'Reportes/citas_por_especialidad.png'
+)
+
+plt.close()
+
+
+## Indicadores tipo KPI
+
+total_pacientes = df_resumen.loc[0,'TotalPacientes']
+total_medicos = df_resumen.loc[0,'TotalMedicos']
+total_citas = df_resumen.loc[0,'TotalCitas']
+facturacion = float(
+    df_facturacion.loc[0,'FacturacionTotal']
+)
+
+print("\nINDICADORES CLINICOS")
+
+print(f"Pacientes: {total_pacientes}")
+print(f"Medicos: {total_medicos}")
+print(f"Citas: {total_citas}")
+print(f"Facturacion: ${facturacion:,.0f}")
+
+
+df_kpi = pd.DataFrame({
+    "Indicador":[
+        "Pacientes",
+        "Medicos",
+        "Citas",
+        "Facturacion"
+    ],
+    "Valor":[
+        total_pacientes,
+        total_medicos,
+        total_citas,
+        facturacion
+    ]
+})
+
+with pd.ExcelWriter(
+    "Reportes/KPIs.xlsx",
+    engine="openpyxl"
+) as writer:
+
+    df_kpi.to_excel(
+        writer,
+        sheet_name="KPIs",
+        index=False
+    )
+
+
+conexion.close()
+
+print("✅ Conexión cerrada")
 print("✅ Dashboard generado correctamente")
+print("✅ Gráficos generados")
+print("✅ KPIs generados")
+
