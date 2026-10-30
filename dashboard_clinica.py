@@ -2,6 +2,10 @@
 import matplotlib.pyplot as plt
 import pyodbc
 import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.drawing.image import Image
+from datetime import datetime
 
 conexion = pyodbc.connect(
     "DRIVER={ODBC Driver 17 for SQL Server};"
